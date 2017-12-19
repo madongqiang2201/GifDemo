@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="color_line">#8CA0B3</color>
+    <color name="color_text">#999999</color>
+    <color name="color_lock_period">#EF5A50</color>
+    <color name="color_unlock_period">#2BEF5A50</color>
+    <color name="color_apr">#EE5555</color>
+</resources>

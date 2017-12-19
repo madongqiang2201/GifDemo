@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">GifDemo</string>
+    <string name="string_gif_investigate">GIF 调研</string>
+    <string name="string_finger_recognition">指纹识别</string>
+    <string name="string_text_update">数字更新效果测试</string>
+    <string name="string_bar_chart">柱状图</string>
+    <string name="lock_period">锁定期</string>
+    <string name="unlock_period">随时可退</string>
+</resources>

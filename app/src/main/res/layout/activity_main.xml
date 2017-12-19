@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
+    <Button
+        android:id="@+id/btn_gif_investigate"
+        style="@style/BtnStyle"
+        android:text="@string/string_gif_investigate"/>
+
+    <Button
+        android:id="@+id/btn_finger_recognition"
+        style="@style/BtnStyle"
+        android:text="@string/string_finger_recognition"/>
+
+    <TextView
+        android:id="@+id/txt_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginTop="10dp"/>
+
+    <Button
+        android:id="@+id/btn_add"
+        style="@style/BtnStyle"
+        android:text="@string/string_text_update"/>
+
+    <Button
+        android:id="@+id/btn_bar_chart"
+        style="@style/BtnStyle"
+        android:text="@string/string_bar_chart"/>
+</LinearLayout>

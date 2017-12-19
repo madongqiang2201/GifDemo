@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="divider_width">15dp</dimen>
+    <dimen name="translate_x">8dp</dimen>
+    <dimen name="default_height">300dp</dimen>
+    <dimen name="default_bottom_view_height">100dp</dimen>
+    <dimen name="chart_time_limit_text_size">12sp</dimen>
+    <dimen name="chart_lock_text_size">14sp</dimen>
+</resources>
