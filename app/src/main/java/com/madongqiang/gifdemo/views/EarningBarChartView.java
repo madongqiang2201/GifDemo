@@ -1,8 +1,5 @@
 package com.madongqiang.gifdemo.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -93,13 +90,6 @@ public class EarningBarChartView extends View {
      */
     private List<ChartInfo> datas = new ArrayList<>();
     /**
-     * 收益和柱状体动画
-     */
-    private List<ValueAnimator> aprAnimators = new ArrayList<>();
-    private List<List<ValueAnimator>> barAnimators = new ArrayList<>();
-    private List<Float> aprPercents = new ArrayList<>();
-    private List<List<RectF>> barPercents = new ArrayList<>();
-    /**
      * 柱状图左侧边距，累加的数据
      */
     private int dividerWidth = 0;
@@ -134,19 +124,8 @@ public class EarningBarChartView extends View {
      * 最大利率，用来计算控件高度
      */
     private float maxApr;
-    /**
-     * 是否开始播放动画
-     */
-    private List<Boolean> playAprAnimation = new ArrayList<>();
-    private List<List<Boolean>> playBarAnimation = new ArrayList<>();
-    /**
-     * 利率文本高度
-     */
-    private int aprTextHeight;
-    /**
-     * 动画期限
-     */
-    private static final int ANIMATOR_DURATION = 1000;
+
+    private boolean playAnimation;
 
     public EarningBarChartView(Context context) {
         super(context);
@@ -222,11 +201,6 @@ public class EarningBarChartView extends View {
 
         txtLockPeriod = resources.getString(R.string.lock_period);
         txtUnlockPeriod = resources.getString(R.string.unlock_period);
-
-        String formatApr = DensityUtil.addZero(5.55f) + "%";
-        mAprPaint.getTextBounds(formatApr, 0, formatApr.length(), rectTextBounds);
-        aprTextHeight = rectTextBounds.height();
-        rectTextBounds.setEmpty();
     }
 
     @Override
@@ -274,38 +248,16 @@ public class EarningBarChartView extends View {
     private void drawApr(Canvas canvas) {
         for (int i = 0; i < datas.size(); i++) {
             float currentData = datas.get(i).getApr();
-            String formatApr = DensityUtil.addZero(5.55f) + "%";
+            String formatApr = DensityUtil.addZero(currentData) + "%";
+            mAprPaint.getTextBounds(formatApr, 0, formatApr.length(), rectTextBounds);
             if (i == 0) {
                 dividerWidth += dividerSpace;
             } else {
                 dividerWidth += (dividerSpace + bottomCoinWidth);
             }
-            final int index = i;
             // x 是两个柱体之间的空白间距 + 柱体宽度的一半 - 文字宽度的一半
             // y 是柱状图底部 - 柱状图高度 - 偏移量(和柱体的间距)
-            if (playAprAnimation.get(i)) {
-                ValueAnimator aprAnimator = aprAnimators.get(index);
-                if (!aprAnimator.isRunning()) {
-                    aprAnimator.setFloatValues(getMeasuredHeight() - defaultBottomViewHeight - bottomCoinHeight - rectTextBounds.height(), getMeasuredHeight() - defaultBottomViewHeight - currentData * translateX - DensityUtil.dip2px(getContext(), 8) - rectTextBounds.height());
-                    aprAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                        @Override
-                        public void onAnimationUpdate(ValueAnimator animation) {
-                            aprPercents.set(index, (Float) animation.getAnimatedValue());
-                            postInvalidateDelayed(20);
-                        }
-                    });
-
-                    aprAnimator.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            playAprAnimation.set(index, false);
-                        }
-                    });
-                    aprAnimator.start();
-                }
-            }
-
-            canvas.drawText(formatApr, dividerWidth + bottomCoinWidth / 2 - rectTextBounds.width() / 2, aprPercents.get(index), mAprPaint);
+            canvas.drawText(formatApr, dividerWidth + bottomCoinWidth / 2 - rectTextBounds.width() / 2, getMeasuredHeight() - defaultBottomViewHeight - currentData * translateX - DensityUtil.dip2px(getContext(), 8) - rectTextBounds.height(), mAprPaint);
             rectTextBounds.setEmpty();
         }
         dividerWidth = 0;
@@ -396,56 +348,19 @@ public class EarningBarChartView extends View {
             rectFDest.right = rectFDest.left + coinWidth;
             rectFDest.bottom = getMeasuredHeight() - defaultBottomViewHeight;
 
-            for (int j = 0; j < currentData; j++) {
-                final int indexOut = i;
-                final int indexInner = j;
-                if (playBarAnimation.get(i).get(j)) {
-                    ValueAnimator animator = barAnimators.get(i).get(j);
-                    if (!animator.isRunning()) {
-                        final RectF rectF = barPercents.get(i).get(j);
-                        rectF.top = rectFDest.top;
-                        rectF.left = rectFDest.left;
-                        rectF.bottom = rectFDest.bottom;
-                        rectF.right = rectFDest.right;
-
-                        if (currentData - j < 1) {
-                            animator.setFloatValues(getMeasuredHeight() - defaultBottomViewHeight, rectFDest.bottom - translateX * Math.abs(currentData - j));
-//                            rectFDest.bottom =  rectFDest.bottom - translateX * Math.abs(currentData - j);
-//                            rectFDest.top = rectFDest.top - translateX * Math.abs(currentData - j);
-                        } else {
-                            animator.setFloatValues(getMeasuredHeight() - defaultBottomViewHeight, rectFDest.bottom - translateX * j);
-//                            rectFDest.bottom = rectFDest.bottom - translateX;
-//                            rectFDest.top = rectFDest.top - translateX;
-                        }
-                        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator animation) {
-                                rectF.top = (Float) animation.getAnimatedValue() - bottomCoinHeight;
-                                rectF.bottom = (Float) animation.getAnimatedValue();
-                                postInvalidateDelayed(20);
-                            }
-                        });
-                        animator.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                playBarAnimation.get(indexOut).set(indexInner, false);
-                            }
-                        });
-                        animator.start();
-//                        if (currentData - j < 1) {
-//                            rectFDest.bottom =  rectFDest.bottom - translateX * Math.abs(currentData - j);
-//                            rectFDest.top = rectFDest.top - translateX * Math.abs(currentData - j);
-//                        } else {
-//                            rectFDest.bottom = rectFDest.bottom - translateX;
-//                            rectFDest.top = rectFDest.top - translateX;
-//                        }
-                    }
+            for (int j = 1; j <= currentData + 1; j++) {
+                if (currentData - j < 1) {
+                    rectFDest.bottom =  rectFDest.bottom - translateX * Math.abs(currentData - j);
+                    rectFDest.top = rectFDest.top - translateX * Math.abs(currentData - j);
+                } else {
+                    rectFDest.bottom = rectFDest.bottom - translateX;
+                    rectFDest.top = rectFDest.top - translateX;
                 }
 
                 if (i == 0) {
-                    canvas.drawBitmap(mBitmapCenterRed, rectSrc, barPercents.get(i).get(j), mBarPaint);
+                    canvas.drawBitmap(mBitmapCenterRed, rectSrc, rectFDest, mBarPaint);
                 } else {
-                    canvas.drawBitmap(mBitmapCenterYellow, rectSrc, barPercents.get(i).get(j), mBarPaint);
+                    canvas.drawBitmap(mBitmapCenterYellow, rectSrc, rectFDest, mBarPaint);
                 }
             }
             canvas.drawBitmap(mBitmapTop, rectSrc, rectFDest, mBarPaint);
@@ -459,36 +374,10 @@ public class EarningBarChartView extends View {
     public void setDatas(List<ChartInfo> datas) {
         this.datas.clear();
         this.datas.addAll(datas);
-        aprAnimators.clear();
-        barAnimators.clear();
-        aprPercents.clear();
-        barPercents.clear();
         if (datas.size() > 0){
             maxApr = datas.get(0).getApr();
             for (int i = 0; i < datas.size(); i++) {
-                ValueAnimator aprAnimator = new ValueAnimator();
-                aprAnimator.setDuration(ANIMATOR_DURATION);
-                aprAnimators.add(aprAnimator);
-                playAprAnimation.add(false);
-
-                List<Boolean> bars = new ArrayList<>();
-                List<ValueAnimator> temp = new ArrayList<>();
-                List<RectF> rectFS = new ArrayList<>();
                 float currentData = datas.get(i).getApr();
-                for (int j = 0; j < currentData; j++) {
-                    ValueAnimator barAnimator = new ValueAnimator();
-                    barAnimator.setDuration(ANIMATOR_DURATION);
-                    temp.add(barAnimator);
-
-                    rectFS.add(new RectF());
-                    bars.add(false);
-                }
-                barAnimators.add(temp);
-                barPercents.add(rectFS);
-                playBarAnimation.add(bars);
-
-                aprPercents.add((float) (getMeasuredHeight() - defaultBottomViewHeight - bottomCoinHeight - aprTextHeight));
-
                 if (maxApr < currentData) {
                     maxApr = currentData;
                 }
@@ -502,15 +391,8 @@ public class EarningBarChartView extends View {
     /**
      * 当本控件可见时，开始播放动画
      */
-    public void setPlayAprAnimation(boolean playAnimation) {
-        for (int i = 0; i < playAprAnimation.size(); i++) {
-            this.playAprAnimation.set(i, playAnimation);
-        }
-        for (int i = 0; i < playBarAnimation.size(); i++) {
-            for (int j = 0; j < playBarAnimation.get(i).size(); j++) {
-                this.playBarAnimation.get(i).set(j, playAnimation);
-            }
-        }
+    public void setPlayAnimation(boolean playAnimation) {
+        this.playAnimation = playAnimation;
         invalidate();
     }
 

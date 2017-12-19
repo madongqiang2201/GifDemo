@@ -31,7 +31,7 @@ public class BarChartActivity extends AppCompatActivity {
         chartView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                chartView.setPlayAprAnimation(true);
+                chartView.setPlayAnimation(true);
             }
         });
     }
